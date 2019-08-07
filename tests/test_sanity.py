@@ -36,7 +36,7 @@ def restore_and_set_up():
     # don't use the native optimizer from the emsdk - we want to test how it builds
     f.write('\nEMSCRIPTEN_NATIVE_OPTIMIZER = ""\n')
     # make LLVM_ROOT sensitive to the LLVM env var, as we test that
-    f.write('\nLLVM_ROOT = os.path.expanduser(os.getenv("LLVM", "%s"))\n' % LLVM_ROOT)
+    f.write('\nLLVM_ROOT = "%s"\n' % LLVM_ROOT)
     # unfreeze the cache, so we can test that
     f.write('\nFROZEN_CACHE = False\n')
 
@@ -201,7 +201,7 @@ class sanity(RunnerCore):
       self.assertContained('This command will now exit. When you are done editing those paths, re-run it.', output)
       assert output.split()[-1].endswith('===='), 'We should have stopped: ' + output
       config_file = open(CONFIG_FILE).read()
-      template_file = open(path_from_root('tools', 'settings_template_readonly.py')).read()
+      template_file = open(path_from_root('tools', 'settings_template.py')).read()
       self.assertNotContained('~/.emscripten', config_file)
       self.assertContained('~/.emscripten', template_file)
       self.assertNotContained('{{{', config_file)
@@ -790,7 +790,7 @@ fi
     assert not os.environ.get('LLVM'), 'we need to modify LLVM env var for this'
 
     f = open(CONFIG_FILE, 'a')
-    f.write('LLVM_ROOT = os.getenv("LLVM", "' + path_from_root('tests', 'fake1', 'bin') + '")\n')
+    f.write('LLVM_ROOT = "'+ path_from_root('tests', 'fake1', 'bin') + '"\n')
     f.close()
 
     safe_ensure_dirs(path_from_root('tests', 'fake1', 'bin'))
@@ -874,16 +874,6 @@ BINARYEN_ROOT = ''
       wipe()
       self.do([PYTHON, EMCC]) # first run stage
       try_delete(tag_file)
-      config = open(CONFIG_FILE).read()
-      assert '''BINARYEN_ROOT = os.path.expanduser(os.getenv('BINARYEN', ''))''' in config, config # setup created it to be ''
-      print('created config:')
-      print(config)
-      restore_and_set_up()
-      config = open(CONFIG_FILE).read()
-      config = config.replace('BINARYEN_ROOT', '''BINARYEN_ROOT = os.path.expanduser(os.getenv('BINARYEN', '')) # ''')
-      print('modified config:')
-      print(config)
-      open(CONFIG_FILE, 'w').write(config)
 
     print('build using embuilder')
     prep()

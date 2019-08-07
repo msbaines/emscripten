@@ -195,7 +195,7 @@ def check_call(cmd, *args, **kw):
 def generate_config(path, first_time=False):
   # Note: repr is used to ensure the paths are escaped correctly on Windows.
   # The full string is replaced so that the template stays valid Python.
-  config_file = open(path_from_root('tools', 'settings_template_readonly.py')).read().splitlines()
+  config_file = open(path_from_root('tools', 'settings_template.py')).read().splitlines()
   config_file = config_file[3:] # remove the initial comment
   config_file = '\n'.join(config_file)
   # autodetect some default paths
@@ -304,7 +304,10 @@ FROZEN_CACHE = False
 
 
 def parse_config_file():
-  """Parse the emscripten config file using python's exec"""
+  """Parse the emscripten config file using python's exec.
+
+  Also also EM_<KEY> environment variables to override specific config keys.
+  """
   config = {}
   config_text = open(CONFIG_FILE, 'r').read() if CONFIG_FILE else EM_CONFIG
   try:
@@ -315,7 +318,7 @@ def parse_config_file():
   CONFIG_KEYS = (
     'NODE_JS',
     'BINARYEN_ROOT',
-    'EM_POPEN_WORKAROUND',
+    'POPEN_WORKAROUND',
     'SPIDERMONKEY_ENGINE',
     'EMSCRIPTEN_NATIVE_OPTIMIZER',
     'V8_ENGINE',
@@ -333,7 +336,11 @@ def parse_config_file():
 
   # Only popogate certain settings from the config file.
   for key in CONFIG_KEYS:
-    if key in config:
+    env_var = 'EM_' + key
+    env_value = os.environ.get(env_var)
+    if env_value is not None:
+      globals()[key] = env_value
+    elif key in config:
       globals()[key] = config[key]
 
 
@@ -367,9 +374,6 @@ NODE_JS = fix_js_engine(NODE_JS, listify(NODE_JS))
 V8_ENGINE = fix_js_engine(V8_ENGINE, listify(V8_ENGINE))
 COMPILER_ENGINE = listify(COMPILER_ENGINE)
 JS_ENGINES = [listify(engine) for engine in JS_ENGINES]
-
-if EM_POPEN_WORKAROUND is None:
-  EM_POPEN_WORKAROUND = os.environ.get('EM_POPEN_WORKAROUND')
 
 # Install our replacement Popen handler if we are running on Windows to avoid
 # python spawn process function.
