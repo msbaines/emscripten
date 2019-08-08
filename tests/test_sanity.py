@@ -790,7 +790,7 @@ fi
     assert not os.environ.get('LLVM'), 'we need to modify LLVM env var for this'
 
     f = open(CONFIG_FILE, 'a')
-    f.write('LLVM_ROOT = "'+ path_from_root('tests', 'fake1', 'bin') + '"\n')
+    f.write('LLVM_ROOT = "' + path_from_root('tests', 'fake1', 'bin') + '"\n')
     f.close()
 
     safe_ensure_dirs(path_from_root('tests', 'fake1', 'bin'))

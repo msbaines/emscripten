@@ -3,17 +3,22 @@
 
 # Note: If you put paths relative to the home directory, do not forget
 # os.path.expanduser
-
+#
+# Any config setting <KEY> in this file can be overridden by setting the
+# EM_<KEY> environment variable.
+#
 # Note: On Windows, remember to escape backslashes! I.e. LLVM='c:\llvm\'
 # is not valid, but LLVM='c:\\llvm\\' and LLVM='c:/llvm/'
 # are.
 
+import os
+
 # This is used by external projects in order to find emscripten.  It is not used
 # by emscripten itself.
-EMSCRIPTEN_ROOT = '{{{ EMSCRIPTEN_ROOT }}}' # directory
+EMSCRIPTEN_ROOT = os.path.expanduser(os.getenv('EMSCRIPTEN', '{{{ EMSCRIPTEN_ROOT }}}')) # directory
 
-LLVM_ROOT = '{{{ LLVM_ROOT }}}' # directory
-BINARYEN_ROOT = '' # if not set, we will use it from ports
+LLVM_ROOT = os.path.expanduser(os.getenv('LLVM', '{{{ LLVM_ROOT }}}')) # directory
+BINARYEN_ROOT = os.path.expanduser(os.getenv('BINARYEN', '')) # if not set, we will use it from ports
 
 # Add this if you have manually built the JS optimizer executable (in
 # Emscripten/tools/optimizer) and want to run it from a custom location.
@@ -22,9 +27,9 @@ BINARYEN_ROOT = '' # if not set, we will use it from ports
 # EMSCRIPTEN_NATIVE_OPTIMIZER='/path/to/custom/optimizer(.exe)'
 
 # See below for notes on which JS engine(s) you need
-NODE_JS = '{{{ NODE }}}' # executable
-SPIDERMONKEY_ENGINE = 'js' # executable
-V8_ENGINE = 'd8' # executable
+NODE_JS = os.path.expanduser(os.getenv('NODE', '{{{ NODE }}}')) # executable
+SPIDERMONKEY_ENGINE = [os.path.expanduser(os.getenv('SPIDERMONKEY', 'js'))] # executable
+V8_ENGINE = os.path.expanduser(os.getenv('V8', 'd8')) # executable
 
 JAVA = 'java' # executable
 
